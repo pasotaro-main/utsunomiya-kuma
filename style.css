@@ -204,6 +204,36 @@ body {
   background: #2a8cff; border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(42,140,255,.4), 0 0 12px rgba(42,140,255,.7);
 }
 
+/* AI予測カード */
+.predict-card {
+  margin: 0 14px 6px; padding: 11px 14px;
+  background: linear-gradient(135deg, #241a3a 0%, #1c1830 100%);
+  border: 1px solid #4a3a78; border-radius: 14px; cursor: pointer;
+}
+.predict-head { font-size: 12px; font-weight: 800; color: #c4a8ff; letter-spacing: .03em; }
+.predict-body { font-size: 13px; margin-top: 4px; line-height: 1.5; }
+.predict-body b { color: #d9c6ff; }
+.predict-note { display: block; margin-top: 5px; font-size: 11px; color: var(--muted); }
+.predict-marker {
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(168,85,247,.92); color: #fff; font-size: 11px; font-weight: 800;
+  border: 2px solid #fff; border-radius: 13px; height: 26px; box-shadow: 0 2px 8px rgba(0,0,0,.5);
+}
+
+/* ステータス別（未確認/推定）表現 */
+.tag { font-size: 10px; padding: 1px 6px; border-radius: 6px; vertical-align: middle; font-weight: 700; }
+.tag-user { background: #b45309; color: #fff; }
+.tag-locating { background: #475569; color: #fff; }
+.bear-unverified {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: repeating-linear-gradient(45deg, #6b7280, #6b7280 4px, #5b626e 4px, #5b626e 8px);
+  color: #fff; font-weight: 800; border: 2px dashed #cbd5e1; box-shadow: 0 1px 5px rgba(0,0,0,.5);
+}
+.list li.is-unverified .li-place::after {
+  content: "未確認"; font-size: 10px; background: #b45309; color: #fff;
+  padding: 1px 6px; border-radius: 6px; margin-left: 6px; vertical-align: middle;
+}
+
 /* タブレット/PC では中央寄せの読みやすい幅に */
 @media (min-width: 720px) {
   .sheet { max-width: 420px; right: auto; left: 12px; bottom: 12px; border-radius: 18px; }

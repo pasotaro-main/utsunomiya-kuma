@@ -23,9 +23,26 @@ function bearingJP(la1, lo1, la2, lo2) {
   const y = Math.sin((lo2 - lo1) * toR) * Math.cos(la2 * toR);
   const x = Math.cos(la1 * toR) * Math.sin(la2 * toR) -
             Math.sin(la1 * toR) * Math.cos(la2 * toR) * Math.cos((lo2 - lo1) * toR);
-  let deg = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  return degToJP(bearingDeg(la1, lo1, la2, lo2));
+}
+function bearingDeg(la1, lo1, la2, lo2) {
+  const toR = Math.PI / 180;
+  const y = Math.sin((lo2 - lo1) * toR) * Math.cos(la2 * toR);
+  const x = Math.cos(la1 * toR) * Math.sin(la2 * toR) -
+            Math.sin(la1 * toR) * Math.cos(la2 * toR) * Math.cos((lo2 - lo1) * toR);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+function degToJP(deg) {
   const dirs = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
   return dirs[Math.round(deg / 45) % 8];
+}
+function destPoint(lat, lng, bearingDegV, distM) {
+  const R = 6371000, toR = Math.PI / 180, toD = 180 / Math.PI;
+  const br = bearingDegV * toR, d = distM / R, la1 = lat * toR, lo1 = lng * toR;
+  const la2 = Math.asin(Math.sin(la1) * Math.cos(d) + Math.cos(la1) * Math.sin(d) * Math.cos(br));
+  const lo2 = lo1 + Math.atan2(Math.sin(br) * Math.sin(d) * Math.cos(la1),
+                               Math.cos(d) - Math.sin(la1) * Math.sin(la2));
+  return [la2 * toD, lo2 * toD];
 }
 function fmtDist(m) {
   if (m < 1000) return Math.round(m / 10) * 10 + 'm';
@@ -56,11 +73,24 @@ function initMap() {
   }).addTo(map);
 }
 
+function isUnverified(s) { return s.status && s.status !== 'official'; }
+function statusTag(s) {
+  if (s.status === 'user') return ' <span class="tag tag-user">未確認・投稿</span>';
+  if (s.status === 'official_locating') return ' <span class="tag tag-locating">位置推定</span>';
+  return '';
+}
+
 function makeIcon(s, idx, n) {
   if (s.latest) {
     return L.divIcon({
       className: '', html: `<div class="bear-marker bear-latest">🐻</div>`,
       iconSize: [40, 40], iconAnchor: [20, 20], popupAnchor: [0, -22]
+    });
+  }
+  if (isUnverified(s)) {
+    return L.divIcon({
+      className: '', html: `<div class="bear-marker bear-unverified">?</div>`,
+      iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -14]
     });
   }
   const c = ageColor(idx, n);
@@ -73,10 +103,12 @@ function makeIcon(s, idx, n) {
 }
 
 function popupHtml(s) {
-  return `<b>${s.area}</b><br>` +
-    `<span class="popup-when">${whenLabel(s)}</span>` +
+  const src = s.sourceName || '出典';
+  return `<b>${s.area}</b>${statusTag(s)}<br>` +
+    `<span class="popup-when">${whenLabel(s)} ごろ</span>` +
     (s.detail ? `<br>${s.detail}` : '') +
-    (s.source ? `<br><a href="${s.source}" target="_blank" rel="noopener">出典（下野新聞）↗</a>` : '');
+    (s.reporter ? `<br><span class="popup-when">投稿: ${s.reporter}</span>` : '') +
+    (s.source ? `<br><a href="${s.source}" target="_blank" rel="noopener">${src}↗</a>` : '');
 }
 
 function renderMarkers() {
@@ -106,6 +138,53 @@ function focusSighting(s, openList) {
   if (openList) setSheet(false);
 }
 
+/* ---------- AI 次の出没エリア予想（直近の移動ベクトルから推定・参考） ---------- */
+let predictLayers = [];
+function predictNext() {
+  const pts = SIGHTINGS.filter(s => !isUnverified(s));
+  const n = pts.length;
+  if (n < 3) return null;
+  const W = Math.min(6, n);
+  const recent = pts.slice(n - W);
+  const last = recent[recent.length - 1];
+  // 連続ステップの平均距離と、直近区間の正味方位
+  let stepSum = 0;
+  for (let i = 1; i < recent.length; i++)
+    stepSum += haversine(recent[i - 1].lat, recent[i - 1].lng, recent[i].lat, recent[i].lng);
+  const stepAvg = stepSum / (recent.length - 1);
+  const netBearing = bearingDeg(recent[0].lat, recent[0].lng, last.lat, last.lng);
+  const dist = Math.max(stepAvg, 300);
+  const [plat, plng] = destPoint(last.lat, last.lng, netBearing, dist);
+  const radius = Math.min(Math.max(stepAvg * 0.9, 400), 1600);
+  return { lat: plat, lng: plng, bearing: netBearing, dist, radius, from: last };
+}
+function renderPrediction() {
+  predictLayers.forEach(l => map.removeLayer(l));
+  predictLayers = [];
+  const p = predictNext();
+  const card = document.getElementById('predictCard');
+  if (!p) { if (card) card.classList.add('hidden'); return; }
+
+  const line = L.polyline([[p.from.lat, p.from.lng], [p.lat, p.lng]],
+    { color: '#a855f7', weight: 3, opacity: .85, dashArray: '6 6' });
+  const circle = L.circle([p.lat, p.lng],
+    { radius: p.radius, color: '#a855f7', weight: 2, fillColor: '#a855f7', fillOpacity: .12 });
+  const marker = L.marker([p.lat, p.lng], {
+    icon: L.divIcon({ className: '', html: '<div class="predict-marker">🔮予測</div>', iconSize: [62, 26], iconAnchor: [31, 13] }),
+    zIndexOffset: 1500
+  }).bindPopup(`<b>🔮 AI予測（参考）</b><br><span class="popup-when">直近の動きから推定した次の出没エリア。<br>誤差が大きいため目安です。</span>`);
+  [circle, line, marker].forEach(l => { l.addTo(map); predictLayers.push(l); });
+
+  if (card) {
+    card.classList.remove('hidden');
+    card.innerHTML =
+      `<div class="predict-head">🔮 AI予測（参考・自動計算）</div>` +
+      `<div class="predict-body">直近の移動から、次は <b>${degToJP(p.bearing)}</b>方向・約 <b>${fmtDist(p.dist)}</b> 先（${p.from.town || '最新地点'}付近の${degToJP(p.bearing)}側）に向かう可能性。<br>` +
+      `<span class="predict-note">※クマの動きは不規則です。紫の円は誤差の目安。避難判断は公式情報を優先。</span></div>`;
+    card.onclick = () => { map.flyTo([p.lat, p.lng], 15, { duration: .6 }); marker.openPopup(); };
+  }
+}
+
 /* ---------- 一覧・カード ---------- */
 function renderList() {
   const list = $('list');
@@ -115,8 +194,11 @@ function renderList() {
     const idx = s.id - 1;
     const li = document.createElement('li');
     if (s.latest) li.classList.add('is-latest');
+    if (isUnverified(s)) li.classList.add('is-unverified');
+    const dotBg = s.latest ? '#ff5a36' : (isUnverified(s) ? '#6b7280' : ageColor(idx, n));
+    const dotTxt = s.latest ? '🐻' : (isUnverified(s) ? '?' : idx + 1);
     li.innerHTML =
-      `<span class="dot" style="background:${s.latest ? '#ff5a36' : ageColor(idx, n)}">${s.latest ? '🐻' : idx + 1}</span>` +
+      `<span class="dot" style="background:${dotBg}">${dotTxt}</span>` +
       `<div class="li-main"><div class="li-place">${s.area}</div>` +
       (s.detail ? `<div class="li-detail">${s.detail}</div>` : '') + `</div>` +
       `<div class="li-when">${whenLabel(s)}</div>`;
@@ -341,8 +423,9 @@ function initRadius() {
 
 /* ---------- 起動 ---------- */
 // データ取得先: ①GitHub raw（10分おきに自動更新される最新版）→ ②同梱コピー（オフライン/フォールバック）
+const RAW_DATA = 'https://raw.githubusercontent.com/pasotaro-main/utsunomiya-kuma/main/data/sightings.json';
 const DATA_SOURCES = [
-  'https://raw.githubusercontent.com/pasotaro-main/utsunomiya-kuma/main/data/sightings.json',
+  RAW_DATA + '?t=' + Math.floor(Date.now() / 60000), // 1分ごとにキャッシュ回避（最新を取りに行く）
   'data/sightings.json'
 ];
 async function loadData() {
@@ -368,6 +451,7 @@ async function boot() {
   renderMarkers();
   showAllOnMap();
   renderList();
+  renderPrediction();
   initRadius();
   initSheetDrag();
   setSheet(false);

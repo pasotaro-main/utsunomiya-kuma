@@ -1,136 +1,171 @@
 #!/usr/bin/env python3
 """
-宇都宮熊 データ更新スクリプト
---------------------------------
-下野新聞「とちぎのクマ目撃情報2026」Google マイマップ(KML) を取得し、
-"市街地に逃げ込んだ今回のクマ" の範囲（中心部 bbox × 6月の期間）だけを抽出して
-data/sightings.json にマージする。
+宇都宮熊 データ更新スクリプト（公式ページ版）
+---------------------------------------------
+宇都宮市公式「クマの出没にご注意ください」ページから、時刻つきの目撃情報を取得して
+data/sightings.json を作り直す。各目撃は「<町名>地内　<ランドマーク>から<方角><距離>m付近」
+の形なので、ランドマーク座標表 + 方角/距離オフセットで座標化する。
 
-- 既存の手入力キャプション（場所名・時刻・detail）は保持する。
-- 新しい座標（既存からおおよそ40m以上離れた点）だけを追記する。
-- 追記された点の場所名は「（自動取得・要確認）」となる。
-  → スケジュール実行の Claude ルーティンが、出典記事を読んで正式な地名・時刻に整える想定。
-- "latest"（最新地点）は日付が最も新しい点に付け替える。
+- 公式の確かな情報のみ（status=official）。投稿（ユーザー報告）は別系統(Firestore)で扱う。
+- 目撃時刻(time)を必ず保持する。
+- 内容に変化が無ければ書き込まない（無駄なcommitを防ぐ）。
+- 未知のランドマークが出たら status=official_locating として町名近辺に置き、警告を出す。
 
 使い方:  python3 update_data.py
 """
-import json, os, sys, urllib.request, datetime
-import xml.etree.ElementTree as ET
+import json, os, sys, re, math, urllib.request, datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data", "sightings.json")
-MID = "1FiDKp98cxzU1GQu04o5rnmbtT1mgmZs"
-KML_URL = f"https://www.google.com/maps/d/kml?mid={MID}&forcekml=1"
+OFFICIAL_URL = "https://www.city.utsunomiya.lg.jp/kurashi/oshiraselist/1034544/1025612.html"
+YEAR = 2026
+BBOX = (36.45, 36.66, 139.78, 139.98)  # 妥当性チェック用（宇都宮市域）
 
-# 「今回の市街地のクマ」の抽出条件
-BBOX = (36.50, 36.62, 139.82, 139.95)      # lat_min, lat_max, lng_min, lng_max（宇都宮中心部）
-DATE_FROM = "2026-06-01"                     # この出没事案の期間
-DATE_TO = "2026-06-30"
-MERGE_DIST_M = 40                            # これ以内の既存点は「同じ地点」とみなす
-KNS = "{http://www.opengis.net/kml/2.2}"
+# ランドマーク座標（GSI/OSM/下野新聞マイマップから確定済み）
+LANDMARKS = {
+    "栃木県立図書館": (36.5657, 139.8843),
+    "図書館": (36.5657, 139.8843),
+    "明保野公園": (36.5476, 139.8676),
+    "宇都宮高等学校": (36.539781, 139.862824),
+    "姿川中学校": (36.53598, 139.85634),
+    "姿川地区市民センター": (36.52955, 139.849098),
+    "中央卸売市場": (36.546299, 139.892565),
+    "陽南中学校": (36.54704, 139.88862),
+    "城東小学校": (36.550158, 139.903336),
+    "宇都宮大学峰キャンパス": (36.548755, 139.913087),
+    "長岡公園": (36.588501, 139.879821),
+    "消防局中央消防署": (36.576483, 139.890648),  # 上大曽町近辺（中央消防署の精密座標は未取得）
+}
+# 町名フォールバック（ランドマーク不明時）
+TOWN_FALLBACK = {
+    "上大曽町": (36.576483, 139.890648),
+}
+BEARING = {"北": 0, "北東": 45, "東": 90, "南東": 135, "南": 180, "南西": 225, "西": 270, "北西": 315}
 
 
-def haversine(la1, lo1, la2, lo2):
-    import math
+def dest(lat, lng, bearing_deg, dist_m):
     R = 6371000.0
-    dla = math.radians(la2 - la1); dlo = math.radians(lo2 - lo1)
-    a = math.sin(dla/2)**2 + math.cos(math.radians(la1))*math.cos(math.radians(la2))*math.sin(dlo/2)**2
-    return 2*R*math.asin(math.sqrt(a))
+    br = math.radians(bearing_deg); d = dist_m / R
+    la1 = math.radians(lat); lo1 = math.radians(lng)
+    la2 = math.asin(math.sin(la1) * math.cos(d) + math.cos(la1) * math.sin(d) * math.cos(br))
+    lo2 = lo1 + math.atan2(math.sin(br) * math.sin(d) * math.cos(la1),
+                           math.cos(d) - math.sin(la1) * math.sin(la2))
+    return round(math.degrees(la2), 6), round(math.degrees(lo2), 6)
 
 
-def norm_date(name):
-    """KMLの name(例 2026/06/07, 2026/4/10, 2020/06/07[誤記]) を YYYY-MM-DD に。"""
-    s = (name or "").strip().replace(".", "/").replace("-", "/")
-    parts = s.split("/")
-    if len(parts) < 3 or not parts[0].isdigit():
-        return None
-    y, m, d = parts[0], parts[1], parts[2][:2]
-    if not (m.isdigit() and d.isdigit()):
-        return None
-    if y == "2020":          # データ内に紛れている明らかな誤記を補正
-        y = "2026"
-    try:
-        return datetime.date(int(y), int(m), int(d)).isoformat()
-    except ValueError:
-        return None
+def norm_landmark(name):
+    name = name.strip("　 ")
+    for pre in ("栃木県立", "宇都宮市立", "宇都宮市"):
+        if name.startswith(pre):
+            name = name[len(pre):]
+    return name
 
 
-def fetch_kml():
-    req = urllib.request.Request(KML_URL, headers={"User-Agent": "utsunomiya-kuma/1.0"})
+def geocode(town, phrase):
+    """ phrase 例: '宇都宮大学峰キャンパスから南西700m付近' / '明保野公園内' / '陽南中学校の東側' """
+    base, bearing, dist = phrase, None, 0
+    m = re.search(r"(.+?)から(北東|南東|南西|北西|東|西|南|北)側?\s*(\d+)\s*m", phrase)
+    if m:
+        base, bearing, dist = m.group(1), m.group(2), int(m.group(3))
+    else:
+        m = re.search(r"(.+?)の(北東|南東|南西|北西|東|西|南|北)側", phrase)
+        if m:
+            base, bearing, dist = m.group(1), m.group(2), 150
+        else:
+            base = re.sub(r"(付近|内|校庭).*$", "", phrase)
+    key = norm_landmark(base)
+    coord, status = None, "official"
+    for k, v in LANDMARKS.items():
+        if k in key or key in k:
+            coord = v; break
+    if coord is None and town in TOWN_FALLBACK:
+        coord = TOWN_FALLBACK[town]; status = "official_locating"
+    if coord is None:
+        return None, "official_locating"
+    if bearing and dist:
+        lat, lng = dest(coord[0], coord[1], BEARING[bearing], dist)
+    else:
+        lat, lng = coord
+    return (lat, lng), status
+
+
+def to_24h(ampm, hour, minute):
+    h = hour % 12
+    if ampm == "午後":
+        h += 12
+    return f"{h:02d}:{minute:02d}"
+
+
+def fetch(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "utsunomiya-kuma-map/1.0 (pasotaro@pasotaro.com)"})
     with urllib.request.urlopen(req, timeout=30) as r:
-        return r.read()
+        return r.read().decode("utf-8", "replace")
 
 
-def parse_incident(kml_bytes):
-    root = ET.fromstring(kml_bytes)
+def parse_official(html):
     out = []
-    for pm in root.iter(f"{KNS}Placemark"):
-        name = pm.findtext(f"{KNS}name", default="")
-        desc = pm.findtext(f"{KNS}description", default="")
-        c = pm.find(f".//{KNS}coordinates")
-        if c is None or not c.text:
+    for t in re.findall(r"・\s*([^<]+?)\s*</p>", html):
+        m = re.match(r"(\d+)月(\d+)日（[^）]*）\s*(午前|午後)\s*(\d+)時(?:\s*(\d+)\s*分)?", t)
+        if not m:
             continue
-        lng, lat, *_ = [float(x) for x in c.text.strip().split(",")]
-        date = norm_date(name)
-        if not date:
+        mo, da, ampm, hh, mm = int(m.group(1)), int(m.group(2)), m.group(3), int(m.group(4)), int(m.group(5) or 0)
+        rest = re.sub(r"^頃?[\s　、,]*", "", t[m.end():])  # 先頭の「頃」と全角スペースを除去
+        sp = re.split(r"地内", rest, maxsplit=1)
+        if len(sp) < 2:
             continue
+        town = sp[0].strip("　 、,")
+        phrase = sp[1].strip("　 、,")
+        date = f"{YEAR}-{mo:02d}-{da:02d}"
+        time_s = to_24h(ampm, hh, mm)
+        coord, status = geocode(town, phrase)
+        if coord is None:
+            print(f"[warn] 座標不明: {town} / {phrase}", file=sys.stderr)
+            continue
+        lat, lng = coord
         if not (BBOX[0] <= lat <= BBOX[1] and BBOX[2] <= lng <= BBOX[3]):
+            print(f"[warn] 範囲外スキップ: {town} {phrase} -> {lat},{lng}", file=sys.stderr)
             continue
-        if not (DATE_FROM <= date <= DATE_TO):
-            continue
-        out.append({"date": date, "lat": lat, "lng": lng, "source": (desc or "").strip()})
-    out.sort(key=lambda p: (p["date"], p["lat"]))
+        out.append({
+            "date": date, "time": time_s, "datetime": f"{date}T{time_s}:00+09:00",
+            "area": f"{town}（{phrase}）", "town": town, "detail": "",
+            "lat": lat, "lng": lng, "status": status,
+            "source": OFFICIAL_URL, "sourceName": "宇都宮市公式",
+        })
+    # 古い順
+    out.sort(key=lambda s: s["datetime"])
+    for i, s in enumerate(out, 1):
+        s["id"] = i
+    if out:
+        out[-1]["latest"] = True
     return out
 
 
 def main():
     with open(DATA, encoding="utf-8") as f:
         data = json.load(f)
-    existing = data["sightings"]
-    before = json.dumps(existing, ensure_ascii=False, sort_keys=True)  # 変更検知用スナップショット
+    before = json.dumps(data.get("sightings", []), ensure_ascii=False, sort_keys=True)
 
     try:
-        incident = parse_incident(fetch_kml())
+        sightings = parse_official(fetch(OFFICIAL_URL))
     except Exception as e:
-        print(f"[error] KML取得/解析に失敗: {e}", file=sys.stderr)
+        print(f"[error] 公式ページ取得/解析に失敗: {e}", file=sys.stderr)
         return 1
-    print(f"[info] マイマップ抽出: {len(incident)}件（中心部×6月）")
+    if not sightings:
+        print("[error] 目撃情報を1件も抽出できませんでした（ページ構造変化の可能性）", file=sys.stderr)
+        return 1
+    print(f"[info] 公式から {len(sightings)}件 抽出（最新 {sightings[-1]['date']} {sightings[-1]['time']} {sightings[-1]['town']}）")
 
-    added = 0
-    next_id = max((s["id"] for s in existing), default=0) + 1
-    for p in incident:
-        dup = any(haversine(p["lat"], p["lng"], s["lat"], s["lng"]) <= MERGE_DIST_M for s in existing)
-        if dup:
-            continue
-        existing.append({
-            "id": next_id, "date": p["date"], "time": "",
-            "area": "（自動取得・要確認）宇都宮市街地", "detail": "マイマップから自動追加",
-            "lat": round(p["lat"], 5), "lng": round(p["lng"], 5), "source": p["source"],
-        })
-        next_id += 1; added += 1
-
-    # latest を最新日付の点へ付け替え
-    existing.sort(key=lambda s: (s["date"], s["id"]))
-    for s in existing:
-        s.pop("latest", None)
-    if existing:
-        existing[-1]["latest"] = True
-
-    # 中身が変わっていなければ書き込まない（updatedAtだけの差分でcommitを起こさない）
-    after = json.dumps(existing, ensure_ascii=False, sort_keys=True)
+    after = json.dumps(sightings, ensure_ascii=False, sort_keys=True)
     if after == before:
-        print(f"[ok] 変更なし（{len(existing)}件）。書き込みスキップ。")
+        print(f"[ok] 変更なし（{len(sightings)}件）。書き込みスキップ。")
         return 0
 
-    data["sightings"] = existing
+    data["sightings"] = sightings
     data["updatedAt"] = datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
-
     with open(DATA, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
         f.write("\n")
-    print(f"[ok] 追加 {added}件 / 合計 {len(existing)}件 を data/sightings.json に書き込み（updatedAt={data['updatedAt']}）")
-    if added:
-        print("[next] 追加点の場所名は『（自動取得・要確認）』です。出典記事を読んで正式名に整えてください。")
+    print(f"[ok] {len(sightings)}件を data/sightings.json に書き込み（updatedAt={data['updatedAt']}）")
     return 0
 
 
