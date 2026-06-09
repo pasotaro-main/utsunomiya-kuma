@@ -624,6 +624,12 @@ async function boot() {
   try { initSocial(); } catch (e) { console.warn('投稿機能の初期化に失敗', e); }
 
   if ('serviceWorker' in navigator) {
+    // 新しいSWが有効化されたら自動で1回リロード（更新を確実に届ける）
+    let refreshing = false;
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadController && !refreshing) { refreshing = true; location.reload(); }
+    });
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 }
