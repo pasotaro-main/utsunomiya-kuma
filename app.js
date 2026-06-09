@@ -89,11 +89,16 @@ function renderStatus() {
   const el = document.getElementById('statusBanner');
   const st = DATA.incidentStatus;
   if (!el) return;
-  if (st && st.state === 'captured') {
+  el.classList.remove('captured', 'caution');
+  if (st && (st.state === 'captured' || st.state === 'caution')) {
     el.classList.remove('hidden');
+    el.classList.add(st.state);
+    const title = st.state === 'caution'
+      ? '⚠️ 1頭は捕獲・「2頭目」の可能性で警戒継続'
+      : '✅ このクマは捕獲されました（終息）';
     el.innerHTML =
-      `<div class="sb-title">✅ このクマは捕獲されました（終息）</div>` +
-      `<div class="sb-text">${st.date ? escapeHtml(st.date.slice(5)) : ''}${st.time ? ' ' + escapeHtml(st.time) : ''}・${escapeHtml(st.place || '')}<br>${escapeHtml(st.text || '')}</div>` +
+      `<div class="sb-title">${title}</div>` +
+      `<div class="sb-text">${escapeHtml(st.text || '')}</div>` +
       (st.sourceUrl ? `<a href="${st.sourceUrl}" target="_blank" rel="noopener" class="sb-src">出典（${escapeHtml(st.source || '報道')}）↗</a>` : '');
     if (st.lat) el.onclick = () => map.flyTo([st.lat, st.lng], 16, { duration: .6 });
   } else {
@@ -239,8 +244,9 @@ function renderPrediction() {
   predictLayers.forEach(l => map.removeLayer(l));
   predictLayers = [];
   const card = document.getElementById('predictCard');
-  if (DATA.incidentStatus && DATA.incidentStatus.state === 'captured') {
-    if (card) card.classList.add('hidden'); // 捕獲済みは「次の出没予測」を出さない
+  const ist = DATA.incidentStatus && DATA.incidentStatus.state;
+  if (ist === 'captured' || ist === 'caution') {
+    if (card) card.classList.add('hidden'); // 捕獲/警戒中は個体を特定できないため予測を出さない
     return;
   }
   const latest = SIGHTINGS.find(s => s.latest) || SIGHTINGS[SIGHTINGS.length - 1];
