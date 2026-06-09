@@ -33,8 +33,10 @@ jobs:
             git config user.name "kuma-bot"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add data/sightings.json
-            git commit -m "auto: update sightings $(date -u +%FT%TZ) [skip ci]"
-            git push
+            git commit -m "auto(ci): update sightings $(date -u +%FT%TZ) [skip ci]"
+            # Claudeスケジュール等と押し合っても壊れないよう、push前に取り込み直す（ダブり防止）
+            git pull --rebase --autostash origin main || true
+            git push origin HEAD:main
             echo "::notice::sightings.json updated"
           else
             echo "::notice::no change"
