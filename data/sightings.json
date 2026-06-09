@@ -2,7 +2,7 @@
   "appName": "宇都宮熊",
   "incident": "宇都宮市街地のクマ（2026年6月・同一個体）",
   "description": "2026年6月、宇都宮市の山林から市街地に下りてきた体長1m超・推定100kg超のクマ（同一個体）の目撃地点。宇都宮市公式『クマの出没にご注意ください』の時刻つき情報を10分おきに取得し、地名から座標化して表示。",
-  "updatedAt": "2026-06-09T11:47:32+00:00",
+  "updatedAt": "2026-06-09T22:59:52+09:00",
   "center": [
     36.5556,
     139.8819
@@ -45,6 +45,14 @@
     {
       "when": "6/9",
       "text": "宇都宮大学でドローンによる捜索・全学部が休講。"
+    },
+    {
+      "when": "6/9 正午〜午後",
+      "text": "平松本町など住宅街で数十件の目撃。午後、横川東小付近〜東簗瀬1丁目へ。"
+    },
+    {
+      "when": "6/9 15:30",
+      "text": "東簗瀬1丁目の民家敷地で、麻酔銃3発目が命中し捕獲（JR宇都宮駅の南東約2.5km）。"
     },
     {
       "when": "対応",
@@ -306,33 +314,82 @@
     },
     {
       "date": "2026-06-09",
-      "time": "15:45",
-      "datetime": "2026-06-09T15:45:00+09:00",
-      "area": "東簗瀬1丁目（）",
-      "town": "東簗瀬1丁目",
+      "time": "13:00",
+      "datetime": "2026-06-09T13:00:00+09:00",
+      "area": "平松本町（横川東小学校から北側700m付近）",
+      "town": "平松本町",
       "detail": "",
-      "lat": 36.5657,
-      "lng": 139.8843,
+      "lat": 36.539248,
+      "lng": 139.90677,
       "status": "official",
       "source": "https://www.city.utsunomiya.lg.jp/kurashi/oshiraselist/1034544/1025612.html",
       "sourceName": "宇都宮市公式",
-      "id": 19,
+      "id": 19
+    },
+    {
+      "date": "2026-06-09",
+      "time": "13:35",
+      "datetime": "2026-06-09T13:35:00+09:00",
+      "area": "下栗1丁目（横川東小学校から北西400m付近）",
+      "town": "下栗1丁目",
+      "detail": "",
+      "lat": 36.535497,
+      "lng": 139.903604,
+      "status": "official",
+      "source": "https://www.city.utsunomiya.lg.jp/kurashi/oshiraselist/1034544/1025612.html",
+      "sourceName": "宇都宮市公式",
+      "id": 20
+    },
+    {
+      "date": "2026-06-09",
+      "time": "15:45",
+      "datetime": "2026-06-09T15:45:00+09:00",
+      "area": "東簗瀬1丁目",
+      "town": "東簗瀬1丁目",
+      "detail": "",
+      "lat": 36.541566,
+      "lng": 139.900346,
+      "status": "official_locating",
+      "source": "https://www.city.utsunomiya.lg.jp/kurashi/oshiraselist/1034544/1025612.html",
+      "sourceName": "宇都宮市公式",
+      "id": 21,
       "latest": true
     }
   ],
-  "aiPrediction": {
-    "lat": 36.552,
-    "lng": 139.925,
-    "radius": 1800,
-    "areaText": "宇都宮大学峰キャンパス〜平松本町の東側（陽東・平出〜鬼怒川方面）",
-    "direction": "東〜北東",
-    "horizon": "今夜〜明朝（夜間に活発）",
-    "reasoning": "6/9未明から簗瀬→城東→峰町→平松本町と東〜北東へ進み、宇都宮大学峰キャンパス周辺に滞在。クマは夜間に活発で河川敷・緑地を移動経路に使いやすく、日中は大学構内の林などに潜伏とみられる。夜間は田川・鬼怒川方面の緑地を伝って東（陽東・平出〜鬼怒川河川敷）へ動く可能性。八幡山公園方面へ西寄りに戻る展開も否定できない。",
-    "by": "Claude",
-    "basedOnLatest": "2026-06-09T06:01:00+09:00",
-    "updatedAt": "2026-06-09T11:11:32+09:00"
-  },
+  "aiPrediction": null,
   "webReports": [
+    {
+      "id": "w20260609-cap",
+      "date": "2026-06-09",
+      "time": "15:30",
+      "place": "東簗瀬1丁目（民家敷地）",
+      "lat": 36.541566,
+      "lng": 139.900346,
+      "kind": "捕獲",
+      "summary": "獣医師が麻酔銃を発射、3発目が命中し捕獲（14:35から計3発）。JR宇都宮駅の南東約2.5kmの住宅街。",
+      "source": "下野新聞ほか報道",
+      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1362097",
+      "credibility": "高",
+      "credReason": "下野新聞・Yahoo等 複数報道で一致",
+      "by": "Claude",
+      "checkedAt": "2026-06-09T23:02:10+09:00"
+    },
+    {
+      "id": "w20260609-4",
+      "date": "2026-06-09",
+      "time": "12:00",
+      "place": "平松本町ほか住宅街",
+      "lat": null,
+      "lng": null,
+      "kind": "目撃",
+      "summary": "正午〜午後1時半ごろ、平松本町などの住宅街で数十件の目撃情報。",
+      "source": "下野新聞",
+      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1361827",
+      "credibility": "高",
+      "credReason": "地方紙報道",
+      "by": "Claude",
+      "checkedAt": "2026-06-09T23:02:10+09:00"
+    },
     {
       "id": "w20260609-1",
       "date": "2026-06-09",
@@ -341,29 +398,13 @@
       "lat": 36.548755,
       "lng": 139.913087,
       "kind": "捜索",
-      "summary": "宇都宮大学峰キャンパスでドローン捜索。7:52にクマはいないと確認。全学部・全研究科が休講。",
+      "summary": "宇都宮大学峰キャンパスでドローン捜索。全学部・全研究科が休講。",
       "source": "下野新聞ほか報道",
-      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1361827",
+      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1361865",
       "credibility": "高",
-      "credReason": "地方紙＋複数報道で一致",
+      "credReason": "複数報道",
       "by": "Claude",
-      "checkedAt": "2026-06-09T12:19:24+09:00"
-    },
-    {
-      "id": "w20260609-2",
-      "date": "2026-06-09",
-      "time": "08:30",
-      "place": "市立横川東小学校付近",
-      "lat": 36.532953,
-      "lng": 139.90677,
-      "kind": "捜索",
-      "summary": "6/9朝の目撃地点に近い市立横川東小学校でドローン捜索（発見につながらず）。",
-      "source": "下野新聞",
-      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1361827",
-      "credibility": "高",
-      "credReason": "地方紙報道",
-      "by": "Claude",
-      "checkedAt": "2026-06-09T12:19:24+09:00"
+      "checkedAt": "2026-06-09T23:02:10+09:00"
     },
     {
       "id": "w20260609-3",
@@ -373,14 +414,26 @@
       "lat": null,
       "lng": null,
       "kind": "対応",
-      "summary": "市立小中94校が6/9も臨時休校。市・警察が捜索と警戒を継続。",
+      "summary": "市立小中94校が2日連続の臨時休校、県立8校も休校。",
       "source": "報道・市発表",
       "sourceUrl": "https://www.city.utsunomiya.lg.jp/kurashi/oshiraselist/1034544/1025612.html",
       "credibility": "高",
       "credReason": "公式・報道一致",
       "by": "Claude",
-      "checkedAt": "2026-06-09T12:19:24+09:00"
+      "checkedAt": "2026-06-09T23:02:10+09:00"
     }
   ],
-  "webReportsNote": "ニュース＋SNSをClaudeが検索して収集し、信憑性（高=公式/大手報道, 中=地方/複数一致, 低=SNS/個人・未確認）を付与。X等の個人投稿は取得が限定的。"
+  "webReportsNote": "ニュース＋SNSをClaudeが検索して収集し、信憑性（高=公式/大手報道, 中=地方/複数一致, 低=SNS/個人・未確認）を付与。X等の個人投稿は取得が限定的。",
+  "incidentStatus": {
+    "state": "captured",
+    "date": "2026-06-09",
+    "time": "15:30",
+    "place": "東簗瀬1丁目（民家敷地）",
+    "lat": 36.541566,
+    "lng": 139.900346,
+    "text": "6/9午後、獣医師が麻酔銃を発射し3発目が命中、東簗瀬1丁目の民家敷地でクマを捕獲。正午〜午後に平松本町などで数十件の目撃。けが人の報道なし。",
+    "source": "下野新聞ほか報道",
+    "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1362097",
+    "updatedAt": "2026-06-09T23:02:10+09:00"
+  }
 }

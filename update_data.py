@@ -32,6 +32,7 @@ LANDMARKS = {
     "中央卸売市場": (36.546299, 139.892565),
     "陽南中学校": (36.54704, 139.88862),
     "城東小学校": (36.550158, 139.903336),
+    "横川東小学校": (36.532953, 139.90677),
     "宇都宮大学峰キャンパス": (36.548755, 139.913087),
     "長岡公園": (36.588501, 139.879821),
     "消防局中央消防署": (36.576483, 139.890648),  # 上大曽町近辺（中央消防署の精密座標は未取得）
@@ -39,6 +40,7 @@ LANDMARKS = {
 # 町名フォールバック（ランドマーク不明時）
 TOWN_FALLBACK = {
     "上大曽町": (36.576483, 139.890648),
+    "東簗瀬1丁目": (36.541566, 139.900346),
 }
 BEARING = {"北": 0, "北東": 45, "東": 90, "南東": 135, "南": 180, "南西": 225, "西": 270, "北西": 315}
 
@@ -75,9 +77,10 @@ def geocode(town, phrase):
             base = re.sub(r"(付近|内|校庭).*$", "", phrase)
     key = norm_landmark(base)
     coord, status = None, "official"
-    for k, v in LANDMARKS.items():
-        if k in key or key in k:
-            coord = v; break
+    if len(key) >= 2:  # 空/短すぎる base が先頭ランドマークに誤マッチするのを防ぐ
+        for k, v in LANDMARKS.items():
+            if k in key or key in k:
+                coord = v; break
     if coord is None and town in TOWN_FALLBACK:
         coord = TOWN_FALLBACK[town]; status = "official_locating"
     if coord is None:
@@ -127,7 +130,7 @@ def parse_official(html):
             continue
         out.append({
             "date": date, "time": time_s, "datetime": f"{date}T{time_s}:00+09:00",
-            "area": f"{town}（{phrase}）", "town": town, "detail": "",
+            "area": (f"{town}（{phrase}）" if phrase else town), "town": town, "detail": "",
             "lat": lat, "lng": lng, "status": status,
             "source": OFFICIAL_URL, "sourceName": "宇都宮市公式",
         })

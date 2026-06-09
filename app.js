@@ -83,6 +83,23 @@ function renderLegend() {
 /* ---------- ニュース・SNS情報（Claudeが信憑性つきで収集） ---------- */
 let webMarkers = [];
 function credColor(c) { return c === '高' ? '#16a34a' : c === '中' ? '#d97706' : '#6b7280'; }
+
+// 事案ステータス（捕獲済み等）のバナー
+function renderStatus() {
+  const el = document.getElementById('statusBanner');
+  const st = DATA.incidentStatus;
+  if (!el) return;
+  if (st && st.state === 'captured') {
+    el.classList.remove('hidden');
+    el.innerHTML =
+      `<div class="sb-title">✅ このクマは捕獲されました（終息）</div>` +
+      `<div class="sb-text">${st.date ? escapeHtml(st.date.slice(5)) : ''}${st.time ? ' ' + escapeHtml(st.time) : ''}・${escapeHtml(st.place || '')}<br>${escapeHtml(st.text || '')}</div>` +
+      (st.sourceUrl ? `<a href="${st.sourceUrl}" target="_blank" rel="noopener" class="sb-src">出典（${escapeHtml(st.source || '報道')}）↗</a>` : '');
+    if (st.lat) el.onclick = () => map.flyTo([st.lat, st.lng], 16, { duration: .6 });
+  } else {
+    el.classList.add('hidden');
+  }
+}
 function renderWebReports() {
   webMarkers.forEach(m => map.removeLayer(m)); webMarkers = [];
   const items = (DATA.webReports || []);
@@ -222,6 +239,10 @@ function renderPrediction() {
   predictLayers.forEach(l => map.removeLayer(l));
   predictLayers = [];
   const card = document.getElementById('predictCard');
+  if (DATA.incidentStatus && DATA.incidentStatus.state === 'captured') {
+    if (card) card.classList.add('hidden'); // 捕獲済みは「次の出没予測」を出さない
+    return;
+  }
   const latest = SIGHTINGS.find(s => s.latest) || SIGHTINGS[SIGHTINGS.length - 1];
 
   // ①Claudeの予測（30分ごとのスケジュールで生成）を優先 → 無ければ②クライアント簡易計算
@@ -431,9 +452,11 @@ function onPos(pos) {
   }
   nearest = best;
   renderProximity(best, lat, lng);
-  if (best.d <= radius) {
+  // 捕獲済みなら全画面アラートは鳴らさない（過去地点での誤警報を防ぐ。距離表示は残す）
+  const captured = DATA.incidentStatus && DATA.incidentStatus.state === 'captured';
+  if (best.d <= radius && !captured) {
     if (!alarmActive && !silenced) triggerAlarm(best, lat, lng);
-  } else if (best.d > radius * 1.15) {
+  } else if (best.d > radius * 1.15 || captured) {
     silenced = false; if (alarmActive) stopAlarm();
   }
   if (alarmActive) updateAlarm(best, lat, lng);
@@ -684,6 +707,7 @@ async function boot() {
   initMap();
   renderMarkers();
   showAllOnMap();
+  renderStatus();
   renderList();
   renderPrediction();
   renderLegend();
