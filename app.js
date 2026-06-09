@@ -421,6 +421,161 @@ function initRadius() {
   });
 }
 
+/* ---------- 投稿（Googleログイン＋Firestore・未確認・信頼度UP） ---------- */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCeOQaWfUB4IAWl5jaw1Hi9NumC5NJ5UZE",
+  authDomain: "utsunomiya-kuma.firebaseapp.com",
+  projectId: "utsunomiya-kuma",
+  storageBucket: "utsunomiya-kuma.firebasestorage.app",
+  messagingSenderId: "312666318631",
+  appId: "1:312666318631:web:c4ad6b9dc1c89b30cbab02"
+};
+let fbAuth = null, fbDb = null, fbUser = null;
+let USER_REPORTS = [], reportMarkers = [], reportPin = null;
+
+function escapeHtml(s) { return (s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function fmtReportWhen(iso) { const d = new Date(iso); if (isNaN(d)) return iso || ''; return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
+
+function initSocial() {
+  if (typeof firebase === 'undefined') { console.warn('firebase未ロード（投稿機能オフ）'); return; }
+  firebase.initializeApp(FIREBASE_CONFIG);
+  fbAuth = firebase.auth();
+  fbDb = firebase.firestore();
+  fbAuth.onAuthStateChanged((u) => { fbUser = u; updateAuthChip(); updateReportAuth(); });
+  fbDb.collection('reports').orderBy('createdAt', 'desc').limit(300)
+    .onSnapshot((snap) => {
+      USER_REPORTS = [];
+      snap.forEach(d => { const r = d.data(); r._id = d.id; if (r.lat && r.lng) USER_REPORTS.push(r); });
+      renderReports();
+    }, (e) => console.warn('reports購読エラー', e));
+  $('reportBtn').addEventListener('click', openReportModal);
+  $('reportCancel').addEventListener('click', closeReportModal);
+  $('reportCurrent').addEventListener('click', pinToCurrent);
+  $('reportSubmit').addEventListener('click', submitReport);
+}
+
+function updateAuthChip() {
+  const chip = $('authChip'); if (!chip) return;
+  chip.innerHTML = fbUser
+    ? `ログイン中: <b>${escapeHtml(fbUser.displayName || '名無し')}</b> <button id="signOutBtn" class="link-btn">ログアウト</button>`
+    : `<button id="signInBtn" class="link-btn">Googleでログイン</button>`;
+  const si = $('signInBtn'); if (si) si.onclick = signIn;
+  const so = $('signOutBtn'); if (so) so.onclick = () => fbAuth.signOut();
+}
+async function signIn() {
+  try { await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+  catch (e) { alert('ログインに失敗しました: ' + (e.message || e)); }
+}
+
+// 場所(≤400m)×時間(≤3h)の近さで「同じ目撃と思われる投稿数」＝信頼度
+function corroborationCount(r) {
+  const t = Date.parse(r.sightedAt); let n = 0;
+  for (const o of USER_REPORTS) {
+    const dt = Math.abs(Date.parse(o.sightedAt) - t) / 3600000;
+    if (haversine(r.lat, r.lng, o.lat, o.lng) <= 400 && (isNaN(dt) || dt <= 3)) n++;
+  }
+  return Math.max(1, n);
+}
+function confOpacity(c) { return Math.min(0.3 + 0.2 * (c - 1), 0.92); }
+
+function renderReports() {
+  reportMarkers.forEach(m => map.removeLayer(m));
+  reportMarkers = [];
+  USER_REPORTS.forEach(r => {
+    const c = corroborationCount(r), op = confOpacity(c);
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="report-marker" style="opacity:${op}">📣${c > 1 ? `<span class="rep-badge">${c}</span>` : ''}</div>`,
+      iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15]
+    });
+    const m = L.marker([r.lat, r.lng], { icon, zIndexOffset: 800 }).bindPopup(reportPopup(r, c));
+    m.addTo(map); reportMarkers.push(m);
+  });
+  renderReportsList();
+}
+function reportPopup(r, c) {
+  return `<b>📣 未確認・投稿</b>${c > 1 ? ` <span class="tag tag-conf">近くに${c}件</span>` : ''}<br>` +
+    `<span class="popup-when">${fmtReportWhen(r.sightedAt)} ごろ</span>` +
+    (r.note ? `<br>${escapeHtml(r.note)}` : '') +
+    `<br><span class="popup-when">投稿: ${escapeHtml(r.displayName || '名無し')}</span>`;
+}
+function renderReportsList() {
+  const list = $('reportsList'), empty = $('reportsEmpty');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!USER_REPORTS.length) { if (empty) empty.classList.remove('hidden'); return; }
+  if (empty) empty.classList.add('hidden');
+  USER_REPORTS.slice().sort((a, b) => Date.parse(b.sightedAt) - Date.parse(a.sightedAt)).forEach(r => {
+    const c = corroborationCount(r);
+    const li = document.createElement('li');
+    li.className = 'is-report';
+    li.innerHTML = `<span class="dot" style="background:#b45309;opacity:${confOpacity(c)}">📣</span>` +
+      `<div class="li-main"><div class="li-place">${escapeHtml(r.note || '目撃情報')} ${c > 1 ? `<span class="tag tag-conf">${c}件</span>` : ''}</div>` +
+      `<div class="li-detail">投稿: ${escapeHtml(r.displayName || '名無し')}</div></div>` +
+      `<div class="li-when">${fmtReportWhen(r.sightedAt)}</div>`;
+    li.onclick = () => map.flyTo([r.lat, r.lng], 16, { duration: .5 });
+    list.appendChild(li);
+  });
+}
+
+function openReportModal() {
+  if (!fbAuth) { alert('投稿機能を準備中です'); return; }
+  const c = meMarker ? meMarker.getLatLng() : map.getCenter();
+  if (!reportPin) {
+    reportPin = L.marker(c, {
+      draggable: true, zIndexOffset: 3000,
+      icon: L.divIcon({ className: '', html: '<div class="report-pin">📍ここ</div>', iconSize: [54, 30], iconAnchor: [27, 30] })
+    });
+    reportPin.on('drag', updateReportLoc);
+  } else reportPin.setLatLng(c);
+  reportPin.addTo(map);
+  updateReportLoc();
+  const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  $('reportTime').value = now.toISOString().slice(0, 16);
+  $('reportModal').classList.remove('hidden');
+  setSheet(false);
+  updateReportAuth();
+}
+function closeReportModal() { $('reportModal').classList.add('hidden'); if (reportPin) map.removeLayer(reportPin); }
+function updateReportLoc() {
+  if (!reportPin) return; const ll = reportPin.getLatLng();
+  $('reportLoc').textContent = `場所：緯度 ${ll.lat.toFixed(5)}, 経度 ${ll.lng.toFixed(5)}（ピンをドラッグで調整）`;
+}
+function pinToCurrent() {
+  if (meMarker && reportPin) { reportPin.setLatLng(meMarker.getLatLng()); map.panTo(meMarker.getLatLng()); updateReportLoc(); }
+  else if (navigator.geolocation && reportPin) navigator.geolocation.getCurrentPosition(p => {
+    const ll = [p.coords.latitude, p.coords.longitude]; reportPin.setLatLng(ll); map.panTo(ll); updateReportLoc();
+  });
+}
+function updateReportAuth() {
+  const el = $('reportAuth'); if (!el) return;
+  el.innerHTML = fbUser
+    ? `<span class="ok">✓ ${escapeHtml(fbUser.displayName || '')} としてログイン中</span>`
+    : `<button id="reportSignIn" class="report-btn primary" style="width:100%">Googleでログインして投稿</button>`;
+  const b = $('reportSignIn'); if (b) b.onclick = signIn;
+}
+async function submitReport() {
+  if (!fbUser) { signIn(); return; }
+  if (!reportPin) return;
+  const ll = reportPin.getLatLng();
+  const t = $('reportTime').value;
+  if (!t) { alert('目撃した日時を入れてください'); return; }
+  try {
+    await fbDb.collection('reports').add({
+      uid: fbUser.uid,
+      displayName: fbUser.displayName || '名無し',
+      lat: +ll.lat.toFixed(5), lng: +ll.lng.toFixed(5),
+      sightedAt: new Date(t).toISOString(),
+      note: ($('reportNote').value || '').slice(0, 200),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'user'
+    });
+    $('reportNote').value = '';
+    closeReportModal();
+    alert('投稿しました。ありがとうございます！（未確認として薄く表示され、同じ場所・時間帯の投稿が増えると濃くなります）');
+  } catch (e) { alert('投稿に失敗しました: ' + (e.message || e)); }
+}
+
 /* ---------- 起動 ---------- */
 // データ取得先: ①GitHub raw（10分おきに自動更新される最新版）→ ②同梱コピー（オフライン/フォールバック）
 const RAW_DATA = 'https://raw.githubusercontent.com/pasotaro-main/utsunomiya-kuma/main/data/sightings.json';
@@ -465,6 +620,8 @@ async function boot() {
   $('playBtn').addEventListener('click', playTimeline);
   $('alertClose').addEventListener('click', () => { silenced = true; stopAlarm(); });
   window.addEventListener('resize', () => setSheet(sheetExpanded));
+
+  try { initSocial(); } catch (e) { console.warn('投稿機能の初期化に失敗', e); }
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});

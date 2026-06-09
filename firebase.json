@@ -1,13 +1,19 @@
 {
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "hosting": {
     "public": ".",
     "ignore": [
       "firebase.json",
       "**/.*",
+      ".git/**",
+      ".github/**",
       ".claude/**",
       "**/node_modules/**",
       "update_data.py",
       "map.kml",
+      "city.html",
       "firebase-debug.log",
       "docs/**",
       "*.md"

@@ -43,6 +43,9 @@
   <!-- 時系列再生ボタン -->
   <button id="playBtn" class="fab fab-play" title="時系列を再生" aria-label="時系列を再生">▶</button>
 
+  <!-- 目撃情報を投稿ボタン -->
+  <button id="reportBtn" class="fab fab-report" title="目撃情報を投稿" aria-label="目撃情報を投稿">＋目撃</button>
+
   <!-- ボトムシート -->
   <section id="sheet" class="sheet">
     <div class="sheet-handle" id="sheetHandle"><span></span></div>
@@ -62,6 +65,15 @@
         <span id="count" class="count"></span>
       </div>
       <ul id="list" class="list"></ul>
+
+      <div class="reports-block" id="reportsBlock">
+        <div class="section-head">
+          <h2>みんなの投稿<span class="unverified-note">（未確認）</span></h2>
+          <span id="authChip" class="auth-chip"></span>
+        </div>
+        <ul id="reportsList" class="list reports-list"></ul>
+        <div id="reportsEmpty" class="reports-empty">まだ投稿はありません。右下の「＋目撃」から、見かけた場所・時刻を投稿できます（Googleログイン）。投稿は薄く表示され、同じ場所・時間帯の投稿が増えるほど濃く（信頼度UP）なります。</div>
+      </div>
 
       <details class="story">
         <summary>このクマの動き（まとめ）</summary>
@@ -89,8 +101,28 @@
     <div class="radius-opts" id="radiusOpts"></div>
   </div>
 
+  <!-- 目撃情報の投稿モーダル -->
+  <div id="reportModal" class="report-modal hidden">
+    <div class="report-box">
+      <div class="report-title">目撃情報を投稿</div>
+      <div class="report-hint">地図上の<b>ピンを目撃した場所へドラッグ</b>し、日時とメモを入れて投稿してください。投稿は「未確認」として薄く表示され、同じ場所・時間帯の投稿が増えるほど濃く（信頼度UP）なります。投稿には<b>あなたのGoogle表示名</b>が付きます。</div>
+      <label class="report-field"><span>目撃した日時</span><input type="datetime-local" id="reportTime" /></label>
+      <label class="report-field"><span>メモ（任意・200字まで）</span><textarea id="reportNote" maxlength="200" placeholder="例：オリオン通りで南へ走っていった"></textarea></label>
+      <div class="report-loc" id="reportLoc">場所：地図のピンの位置</div>
+      <div class="report-auth" id="reportAuth"></div>
+      <div class="report-actions">
+        <button id="reportCurrent" class="report-btn ghost">現在地にピン</button>
+        <button id="reportCancel" class="report-btn ghost">キャンセル</button>
+        <button id="reportSubmit" class="report-btn primary">投稿する</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

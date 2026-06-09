@@ -234,6 +234,63 @@ body {
   padding: 1px 6px; border-radius: 6px; margin-left: 6px; vertical-align: middle;
 }
 
+/* 投稿FAB */
+.fab-report {
+  bottom: calc(var(--sheet-peek, 150px) + 126px);
+  width: auto; padding: 0 14px; height: 44px; border-radius: 22px;
+  background: linear-gradient(135deg, #b45309, #d97706); color: #fff;
+  font-weight: 800; font-size: 13px; border: none;
+}
+
+/* 投稿モーダル（下部パネル・地図は上で操作可） */
+.report-modal {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 8000;
+  padding: 0 10px calc(var(--safe-bottom) + 10px); pointer-events: none;
+}
+.report-box {
+  pointer-events: auto; background: var(--panel); border: 1px solid #5a4632;
+  border-radius: 16px; padding: 14px; max-width: 460px; margin: 0 auto;
+  box-shadow: 0 -8px 30px rgba(0,0,0,.6);
+}
+.report-title { font-size: 16px; font-weight: 800; }
+.report-hint { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin: 5px 0 10px; }
+.report-field { display: block; margin-bottom: 9px; }
+.report-field span { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.report-field input, .report-field textarea {
+  width: 100%; box-sizing: border-box; background: var(--panel-2); color: var(--text);
+  border: 1px solid #3a4250; border-radius: 9px; padding: 9px; font: inherit; font-size: 14px;
+}
+.report-field textarea { resize: vertical; min-height: 44px; }
+.report-loc { font-size: 11.5px; color: var(--accent-2); margin: 2px 0 8px; }
+.report-auth { margin-bottom: 8px; }
+.report-auth .ok { color: #36c98a; font-size: 12px; font-weight: 700; }
+.report-actions { display: flex; gap: 8px; }
+.report-btn { border: none; border-radius: 10px; padding: 11px 12px; font-weight: 800; font-size: 13px; cursor: pointer; }
+.report-btn.primary { background: var(--accent); color: #fff; flex: 1; }
+.report-btn.ghost { background: var(--panel-2); color: var(--text); border: 1px solid #3a4250; }
+
+/* 投稿マーカー・ピン */
+.report-marker {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; font-size: 22px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.6));
+}
+.rep-badge {
+  position: absolute; top: -4px; right: -7px; background: #166534; color: #fff;
+  font-size: 10px; font-weight: 800; border-radius: 8px; padding: 0 4px; border: 1px solid #fff;
+}
+.report-pin {
+  background: #b45309; color: #fff; font-weight: 800; font-size: 12px; padding: 4px 8px;
+  border-radius: 10px; border: 2px solid #fff; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.5);
+}
+
+/* 投稿セクション */
+.reports-block { margin-top: 14px; border-top: 1px solid #2c313b; padding-top: 8px; }
+.unverified-note { color: var(--muted); font-size: 11px; font-weight: 400; }
+.reports-empty { font-size: 12px; color: var(--muted); line-height: 1.6; padding: 4px 2px; }
+.auth-chip { font-size: 11px; color: var(--muted); }
+.link-btn { background: none; border: none; color: var(--accent-2); font-weight: 700; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
+.tag-conf { background: #166534; color: #fff; }
+
 /* タブレット/PC では中央寄せの読みやすい幅に */
 @media (min-width: 720px) {
   .sheet { max-width: 420px; right: auto; left: 12px; bottom: 12px; border-radius: 18px; }

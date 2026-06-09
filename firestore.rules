@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 目撃情報の投稿（ユーザー報告・未確認）
+    match /reports/{id} {
+      // 誰でも閲覧可（地図に表示するため）
+      allow read: if true;
+
+      // 投稿はGoogleログイン必須。自分のuidに紐づく・宇都宮近辺・サイズ制限で嘘/荒らしを抑止。
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.lat is number
+        && request.resource.data.lat >= 36.0 && request.resource.data.lat <= 37.5
+        && request.resource.data.lng is number
+        && request.resource.data.lng >= 139.0 && request.resource.data.lng <= 140.5
+        && request.resource.data.note is string && request.resource.data.note.size() <= 200
+        && request.resource.data.displayName is string && request.resource.data.displayName.size() <= 60
+        && request.resource.data.sightedAt is string && request.resource.data.sightedAt.size() <= 40
+        && request.resource.data.createdAt == request.time;
+
+      // 編集は不可。削除は本人の投稿のみ可（取り消し用）。
+      allow update: if false;
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+  }
+}
