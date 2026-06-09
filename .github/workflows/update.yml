@@ -1,0 +1,41 @@
+name: update-sightings
+
+# 10分おきに下野新聞マイマップを取得し、新しい市街地の目撃点を data/sightings.json に反映。
+# 変更があれば commit/push。アプリはこのファイルの raw を読むので、デプロイ不要で最新化される。
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-sightings
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run updater
+        run: python3 update_data.py
+
+      - name: Commit if changed
+        run: |
+          if [ -n "$(git status --porcelain data/sightings.json)" ]; then
+            git config user.name "kuma-bot"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add data/sightings.json
+            git commit -m "auto: update sightings $(date -u +%FT%TZ) [skip ci]"
+            git push
+            echo "::notice::sightings.json updated"
+          else
+            echo "::notice::no change"
+          fi

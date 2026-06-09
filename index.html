@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+  <title>宇都宮熊｜クマ目撃マップ</title>
+  <meta name="description" content="2026年6月、宇都宮市街地に出没したクマの目撃地点を時系列で表示。近づくとアラート。" />
+  <meta name="theme-color" content="#16181d" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="宇都宮熊" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="map" aria-label="クマ目撃地図"></div>
+
+  <!-- 上部バー -->
+  <header id="topbar">
+    <div class="title-wrap">
+      <span class="bear">🐻</span>
+      <div>
+        <h1>宇都宮熊</h1>
+        <p id="subtitle">市街地のクマ目撃マップ</p>
+      </div>
+    </div>
+    <button id="watchBtn" class="watch-btn">現在地で<br>見守り開始</button>
+  </header>
+
+  <!-- 近接ステータス（見守り中に表示） -->
+  <div id="proximity" class="proximity hidden" role="status" aria-live="polite">
+    <span id="proxIcon">📍</span>
+    <span id="proxText">現在地を取得中…</span>
+  </div>
+
+  <!-- 現在地ボタン -->
+  <button id="locateBtn" class="fab" title="現在地へ" aria-label="現在地へ">◎</button>
+
+  <!-- 時系列再生ボタン -->
+  <button id="playBtn" class="fab fab-play" title="時系列を再生" aria-label="時系列を再生">▶</button>
+
+  <!-- ボトムシート -->
+  <section id="sheet" class="sheet">
+    <div class="sheet-handle" id="sheetHandle"><span></span></div>
+
+    <div class="latest-card" id="latestCard">
+      <div class="latest-label">最新の確認地点</div>
+      <div class="latest-place" id="latestPlace">—</div>
+      <div class="latest-date" id="latestDate"></div>
+      <button class="goto-latest" id="gotoLatest">地図でここを見る →</button>
+    </div>
+
+    <div class="sheet-body">
+      <div class="section-head">
+        <h2>目撃の時系列（新しい順）</h2>
+        <span id="count" class="count"></span>
+      </div>
+      <ul id="list" class="list"></ul>
+
+      <details class="story">
+        <summary>このクマの動き（まとめ）</summary>
+        <ol id="storyList" class="story-list"></ol>
+      </details>
+
+      <div class="disclaimer" id="disclaimer"></div>
+    </div>
+  </section>
+
+  <!-- 近接アラート（全画面） -->
+  <div id="alert" class="alert-overlay hidden" role="alertdialog" aria-modal="true">
+    <div class="alert-box">
+      <div class="alert-emoji">🐻⚠️</div>
+      <div class="alert-title">クマ目撃地点が近い！</div>
+      <div class="alert-dist" id="alertDist">—</div>
+      <div class="alert-sub" id="alertSub"></div>
+      <button id="alertClose" class="alert-close">確認した（音を止める）</button>
+    </div>
+  </div>
+
+  <!-- 半径設定モーダル簡易 -->
+  <div id="radiusBar" class="radius-bar hidden">
+    <span>アラート距離</span>
+    <div class="radius-opts" id="radiusOpts"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>

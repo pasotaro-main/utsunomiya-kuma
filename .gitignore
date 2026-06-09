@@ -1,0 +1,7 @@
+firebase-debug.log
+*.log
+.firebase/
+.DS_Store
+node_modules/
+map.kml
+.claude/

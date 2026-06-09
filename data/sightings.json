@@ -1,0 +1,201 @@
+{
+  "appName": "宇都宮熊",
+  "incident": "宇都宮市街地のクマ（2026年6月・同一個体）",
+  "description": "2026年6月、宇都宮市の山林から市街地に下りてきて中心商店街などを移動した体長1m超・推定100kg超のクマ（同一個体）の目撃地点。データは下野新聞「とちぎのクマ目撃情報2026」マイマップから市街地分のみ抽出。",
+  "updatedAt": "2026-06-09T08:48:21+09:00",
+  "center": [
+    36.5556,
+    139.8819
+  ],
+  "defaultRadiusM": 500,
+  "source": {
+    "mymaps": "https://www.google.com/maps/d/u/0/viewer?mid=1FiDKp98cxzU1GQu04o5rnmbtT1mgmZs",
+    "mymapsName": "とちぎのクマ目撃情報2026（下野新聞）",
+    "articles": [
+      "https://www.shimotsuke.co.jp/articles/-/1361066",
+      "https://www.shimotsuke.co.jp/articles/-/1361127"
+    ]
+  },
+  "note": "場所名・時刻は下野新聞の報道とマイマップの座標を突き合わせた参考情報です。正確な最新情報は宇都宮市・警察の公式発表を確認してください。",
+  "timeline": [
+    {
+      "when": "6/6 夜",
+      "text": "長岡町の山林・近隣住宅地で目撃。体長1m超の成獣、足跡から体重100kg超と推定。"
+    },
+    {
+      "when": "6/7 01:15",
+      "text": "塙田1丁目・栃木県立図書館付近。"
+    },
+    {
+      "when": "6/7 02:20",
+      "text": "オリオン通り（中心商店街）を横切る様子が防犯カメラに。"
+    },
+    {
+      "when": "6/7 05:10〜05:30",
+      "text": "明保野町 → 大塚町（JR日光線南側）→ 西川田町へ南西に移動。"
+    },
+    {
+      "when": "6/7 16:00〜16:40",
+      "text": "姿川中学校の校庭、続いて南側の住宅地で目撃。"
+    },
+    {
+      "when": "6/8",
+      "text": "陽南中（陽南2丁目）付近に出没。市立小中94校・県立8校が臨時休校。"
+    },
+    {
+      "when": "6/9 00:10",
+      "text": "個体の確認が難しく捕獲作業を一時中断。"
+    },
+    {
+      "when": "6/9 06:35",
+      "text": "宇都宮大学でドローンによる捜索開始、全学部が休講（※マイマップ未プロット）。"
+    },
+    {
+      "when": "対応",
+      "text": "けが人なし。市は危険鳥獣対策本部を初設置し、麻酔銃・箱わな・緊急銃猟を検討。県警が夜間巡回、県猟友会がパトロール。"
+    }
+  ],
+  "sightings": [
+    {
+      "id": 1,
+      "date": "2026-06-06",
+      "time": "",
+      "area": "長岡町（山林・住宅地）",
+      "detail": "山林から市街地方面へ。最初に目撃された付近。",
+      "lat": 36.58631,
+      "lng": 139.88088,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1360254"
+    },
+    {
+      "id": 2,
+      "date": "2026-06-06",
+      "time": "",
+      "area": "長岡町周辺",
+      "detail": "",
+      "lat": 36.58454,
+      "lng": 139.88272,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1360465"
+    },
+    {
+      "id": 3,
+      "date": "2026-06-06",
+      "time": "",
+      "area": "長岡町〜市街地方面",
+      "detail": "中心部へ向かう途中。",
+      "lat": 36.57502,
+      "lng": 139.88765,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1361066"
+    },
+    {
+      "id": 4,
+      "date": "2026-06-07",
+      "time": "01:15",
+      "area": "塙田1丁目・栃木県立図書館付近",
+      "detail": "未明に中心部で目撃。",
+      "lat": 36.56541,
+      "lng": 139.88499,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1361066"
+    },
+    {
+      "id": 5,
+      "date": "2026-06-07",
+      "time": "02:20",
+      "area": "オリオン通り（中心商店街）",
+      "detail": "商店街を横切る様子が防犯カメラに記録。",
+      "lat": 36.56022,
+      "lng": 139.88366,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1360736"
+    },
+    {
+      "id": 6,
+      "date": "2026-06-07",
+      "time": "05:10",
+      "area": "明保野町",
+      "detail": "南西方向へ移動。",
+      "lat": 36.54579,
+      "lng": 139.86816,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1361066"
+    },
+    {
+      "id": 7,
+      "date": "2026-06-07",
+      "time": "05:15",
+      "area": "大塚町（JR日光線南側）",
+      "detail": "",
+      "lat": 36.54163,
+      "lng": 139.86454,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1360684"
+    },
+    {
+      "id": 8,
+      "date": "2026-06-07",
+      "time": "05:30",
+      "area": "西川田町",
+      "detail": "",
+      "lat": 36.53733,
+      "lng": 139.8571,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1361066"
+    },
+    {
+      "id": 9,
+      "date": "2026-06-07",
+      "time": "",
+      "area": "西川田町周辺",
+      "detail": "",
+      "lat": 36.53559,
+      "lng": 139.85647,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1361066"
+    },
+    {
+      "id": 10,
+      "date": "2026-06-07",
+      "time": "16:00",
+      "area": "姿川中学校 校庭付近",
+      "detail": "日中、学校の校庭で目撃。",
+      "lat": 36.53487,
+      "lng": 139.86079,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1361066"
+    },
+    {
+      "id": 11,
+      "date": "2026-06-07",
+      "time": "16:40",
+      "area": "姿川中学校南側 住宅地",
+      "detail": "",
+      "lat": 36.53301,
+      "lng": 139.85441,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1361066"
+    },
+    {
+      "id": 12,
+      "date": "2026-06-08",
+      "time": "",
+      "area": "宮の原・雀宮方面",
+      "detail": "",
+      "lat": 36.52879,
+      "lng": 139.86254,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1361127"
+    },
+    {
+      "id": 13,
+      "date": "2026-06-08",
+      "time": "",
+      "area": "陽南地区",
+      "detail": "",
+      "lat": 36.53797,
+      "lng": 139.88073,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1361127"
+    },
+    {
+      "id": 14,
+      "date": "2026-06-08",
+      "time": "",
+      "area": "陽南2丁目・陽南中学校付近",
+      "detail": "6/8の主な出没地点。翌9日に94校休校・宇都宮大学で捜索へ。",
+      "lat": 36.54704,
+      "lng": 139.88862,
+      "source": "https://www.shimotsuke.co.jp/articles/-/1361127",
+      "latest": true
+    }
+  ]
+}
