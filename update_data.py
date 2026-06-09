@@ -87,6 +87,7 @@ def main():
     with open(DATA, encoding="utf-8") as f:
         data = json.load(f)
     existing = data["sightings"]
+    before = json.dumps(existing, ensure_ascii=False, sort_keys=True)  # 変更検知用スナップショット
 
     try:
         incident = parse_incident(fetch_kml())
@@ -114,6 +115,12 @@ def main():
         s.pop("latest", None)
     if existing:
         existing[-1]["latest"] = True
+
+    # 中身が変わっていなければ書き込まない（updatedAtだけの差分でcommitを起こさない）
+    after = json.dumps(existing, ensure_ascii=False, sort_keys=True)
+    if after == before:
+        print(f"[ok] 変更なし（{len(existing)}件）。書き込みスキップ。")
+        return 0
 
     data["sightings"] = existing
     data["updatedAt"] = datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()
