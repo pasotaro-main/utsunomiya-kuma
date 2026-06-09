@@ -178,26 +178,44 @@ function predictNext() {
 function renderPrediction() {
   predictLayers.forEach(l => map.removeLayer(l));
   predictLayers = [];
-  const p = predictNext();
   const card = document.getElementById('predictCard');
+  const latest = SIGHTINGS.find(s => s.latest) || SIGHTINGS[SIGHTINGS.length - 1];
+
+  // ①Claudeの予測（30分ごとのスケジュールで生成）を優先 → 無ければ②クライアント簡易計算
+  const ap = DATA.aiPrediction;
+  const byClaude = !!(ap && typeof ap.lat === 'number' && typeof ap.lng === 'number' && latest);
+  const p = byClaude
+    ? { lat: ap.lat, lng: ap.lng, radius: ap.radius || 1500, from: latest }
+    : predictNext();
   if (!p) { if (card) card.classList.add('hidden'); return; }
 
   const line = L.polyline([[p.from.lat, p.from.lng], [p.lat, p.lng]],
     { color: '#a855f7', weight: 3, opacity: .85, dashArray: '6 6' });
   const circle = L.circle([p.lat, p.lng],
     { radius: p.radius, color: '#a855f7', weight: 2, fillColor: '#a855f7', fillOpacity: .12 });
+  const popup = byClaude
+    ? `<b>🔮 AI予測（Claude）</b><br><span class="popup-when">${escapeHtml(ap.areaText || '次の出没エリア')}<br>${escapeHtml(ap.reasoning || '')}</span>`
+    : `<b>🔮 AI予測（参考）</b><br><span class="popup-when">直近の動きから推定した次の出没エリア。誤差が大きいため目安です。</span>`;
   const marker = L.marker([p.lat, p.lng], {
     icon: L.divIcon({ className: '', html: '<div class="predict-marker">🔮予測</div>', iconSize: [62, 26], iconAnchor: [31, 13] }),
     zIndexOffset: 1500
-  }).bindPopup(`<b>🔮 AI予測（参考）</b><br><span class="popup-when">直近の動きから推定した次の出没エリア。<br>誤差が大きいため目安です。</span>`);
+  }).bindPopup(popup);
   [circle, line, marker].forEach(l => { l.addTo(map); predictLayers.push(l); });
 
   if (card) {
     card.classList.remove('hidden');
-    card.innerHTML =
-      `<div class="predict-head">🔮 AI予測（参考・自動計算）</div>` +
-      `<div class="predict-body">直近の移動から、次は <b>${degToJP(p.bearing)}</b>方向・約 <b>${fmtDist(p.dist)}</b> 先（${p.from.town || '最新地点'}付近の${degToJP(p.bearing)}側）に向かう可能性。<br>` +
-      `<span class="predict-note">※クマの動きは不規則です。紫の円は誤差の目安。避難判断は公式情報を優先。</span></div>`;
+    if (byClaude) {
+      card.innerHTML =
+        `<div class="predict-head">🔮 AI予測（Claude）${ap.direction ? ` ・ ${escapeHtml(ap.direction)}方向` : ''}</div>` +
+        `<div class="predict-body"><b>${escapeHtml(ap.areaText || '')}</b><br>` +
+        `<span class="predict-reason">${escapeHtml(ap.reasoning || '')}</span><br>` +
+        `<span class="predict-note">${ap.horizon ? `想定: ${escapeHtml(ap.horizon)}／` : ''}クマの動きは不規則です。避難判断は公式情報を優先。${ap.updatedAt ? `（予測更新 ${String(ap.updatedAt).slice(5, 16).replace('T', ' ')}）` : ''}</span></div>`;
+    } else {
+      card.innerHTML =
+        `<div class="predict-head">🔮 AI予測（参考・自動計算）</div>` +
+        `<div class="predict-body">直近の移動から、次は <b>${degToJP(p.bearing)}</b>方向・約 <b>${fmtDist(p.dist)}</b> 先（${p.from.town || '最新地点'}付近の${degToJP(p.bearing)}側）に向かう可能性。<br>` +
+        `<span class="predict-note">※クマの動きは不規則です。紫の円は誤差の目安。避難判断は公式情報を優先。</span></div>`;
+    }
     card.onclick = () => { map.flyTo([p.lat, p.lng], 15, { duration: .6 }); marker.openPopup(); };
   }
 }

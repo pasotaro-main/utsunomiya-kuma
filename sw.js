@@ -1,5 +1,5 @@
 /* 宇都宮熊 Service Worker */
-const CACHE = 'utsunomiya-kuma-v6';
+const CACHE = 'utsunomiya-kuma-v7';
 const SHELL = [
   './', './index.html', './style.css', './app.js', './manifest.webmanifest',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
