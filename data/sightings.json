@@ -59,6 +59,10 @@
       "text": "宇都宮大学で早朝に『2頭』目撃の報告、報道で『複数頭の可能性』も指摘（未確認）。1頭捕獲後も警戒継続。"
     },
     {
+      "when": "6/10",
+      "text": "捕獲個体は市の要領に基づき殺処分（雄・約1m・約100kg）。『2頭目の可能性が否定できない』として94校が3日連続の臨時休校。新たな目撃はなし。"
+    },
+    {
       "when": "対応",
       "text": "けが人なし。市は危険鳥獣対策本部を初設置し、麻酔銃・箱わな・緊急銃猟を検討。県警が夜間巡回、県猟友会がパトロール。"
     }
@@ -363,6 +367,38 @@
   "aiPrediction": null,
   "webReports": [
     {
+      "id": "w20260610-close",
+      "date": "2026-06-10",
+      "time": "",
+      "place": "宇都宮市全域",
+      "lat": null,
+      "lng": null,
+      "kind": "対応",
+      "summary": "『2頭目がいる可能性が否定できない』として、6/10も市立小中94校が臨時休校（3日連続）。",
+      "source": "下野新聞",
+      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1362410",
+      "credibility": "高",
+      "credReason": "地方紙報道（市教委発表）",
+      "by": "Claude",
+      "checkedAt": "2026-06-10T08:16:53+09:00"
+    },
+    {
+      "id": "w20260609-cap",
+      "date": "2026-06-09",
+      "time": "15:45",
+      "place": "東簗瀬1丁目（住宅軒下）",
+      "lat": 36.541566,
+      "lng": 139.900346,
+      "kind": "捕獲",
+      "summary": "麻酔銃で1頭を捕獲（雄の成獣・体長約1m・約100kg）。人家侵入個体は殺処分とする市の要領に基づき殺処分。",
+      "source": "下野新聞ほか報道",
+      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1362410",
+      "credibility": "高",
+      "credReason": "下野新聞・複数報道で一致",
+      "by": "Claude",
+      "checkedAt": "2026-06-10T08:16:53+09:00"
+    },
+    {
       "id": "w20260609-2bears",
       "date": "2026-06-09",
       "time": "05:30",
@@ -376,68 +412,20 @@
       "credibility": "中",
       "credReason": "報道で指摘・宇大で2頭目撃の報告。ただし市/警察の確定情報なし",
       "by": "Claude",
-      "checkedAt": "2026-06-09T23:37:01+09:00"
-    },
-    {
-      "id": "w20260609-cap",
-      "date": "2026-06-09",
-      "time": "15:30",
-      "place": "東簗瀬1丁目（民家敷地）",
-      "lat": 36.541566,
-      "lng": 139.900346,
-      "kind": "捕獲",
-      "summary": "獣医師が麻酔銃を発射、3発目が命中し1頭を捕獲（14:35から計3発）。",
-      "source": "下野新聞ほか報道",
-      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1362097",
-      "credibility": "高",
-      "credReason": "下野新聞・Yahoo等 複数報道で一致",
-      "by": "Claude",
-      "checkedAt": "2026-06-09T23:37:01+09:00"
-    },
-    {
-      "id": "w20260609-4",
-      "date": "2026-06-09",
-      "time": "12:00",
-      "place": "平松本町ほか住宅街",
-      "lat": null,
-      "lng": null,
-      "kind": "目撃",
-      "summary": "正午〜午後1時半ごろ、平松本町などの住宅街で数十件の目撃情報。",
-      "source": "下野新聞",
-      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1361827",
-      "credibility": "高",
-      "credReason": "地方紙報道",
-      "by": "Claude",
-      "checkedAt": "2026-06-09T23:37:01+09:00"
-    },
-    {
-      "id": "w20260609-3",
-      "date": "2026-06-09",
-      "time": "",
-      "place": "宇都宮市全域",
-      "lat": null,
-      "lng": null,
-      "kind": "対応",
-      "summary": "市立小中94校が2日連続の臨時休校、県立8校も休校。",
-      "source": "報道・市発表",
-      "sourceUrl": "https://www.city.utsunomiya.lg.jp/kurashi/oshiraselist/1034544/1025612.html",
-      "credibility": "高",
-      "credReason": "公式・報道一致",
-      "by": "Claude",
-      "checkedAt": "2026-06-09T23:37:01+09:00"
+      "checkedAt": "2026-06-10T08:16:53+09:00"
     }
   ],
   "webReportsNote": "ニュース＋SNSをClaudeが検索して収集し、信憑性（高=公式/大手報道, 中=地方/複数一致, 低=SNS/個人・未確認）を付与。X等の個人投稿は取得が限定的。",
   "incidentStatus": {
     "state": "caution",
-    "date": "2026-06-09",
-    "time": "15:30",
-    "place": "東簗瀬1丁目（捕獲現場）",
+    "date": "2026-06-10",
+    "time": "",
+    "place": "宇都宮市全域",
     "lat": 36.541566,
     "lng": 139.900346,
-    "text": "6/9に1頭を捕獲（東簗瀬1丁目・麻酔銃3発目命中、けが人の報道なし）。ただし宇都宮大学で6/9早朝に『2頭』目撃の報告があり、報道でも『複数頭の可能性』が指摘されています（市・警察の確定情報はなく未確認）。警戒は継続中。最新の公式情報にご注意ください。",
-    "source": "下野新聞・Yahoo/J-CASTほか報道",
-    "sourceUrl": "https://news.yahoo.co.jp/articles/622ac1490ae6a79cd234e4e584e1ccdcb290c317",
-    "updatedAt": "2026-06-09T23:37:01+09:00"
+    "text": "6/9に1頭を捕獲（東簗瀬1丁目・雄の成獣・体長約1m・約100kg）。人家に侵入した個体は殺処分とする市の要領に基づき殺処分されました。一部の目撃情報から『2頭目がいる可能性が否定できない』として、6/10も市立小中94校が臨時休校（3日連続）。6/10時点で新たな目撃はありません。最新の公式情報にご注意ください。",
+    "source": "下野新聞",
+    "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1362410",
+    "updatedAt": "2026-06-10T08:16:53+09:00"
   }
 }
