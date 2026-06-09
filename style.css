@@ -291,6 +291,15 @@ body {
 .link-btn { background: none; border: none; color: var(--accent-2); font-weight: 700; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
 .tag-conf { background: #166534; color: #fff; }
 
+/* 作成クレジット */
+.credit {
+  margin-top: 12px; padding: 10px 0 4px; text-align: center;
+  font-size: 12px; color: #cfd5df; letter-spacing: .02em;
+  border-top: 1px solid #2c313b;
+}
+.credit b { color: #fff; font-weight: 700; }
+.credit .cross { color: var(--accent); font-weight: 800; margin: 0 3px; }
+
 /* 凡例（情報元の色分け） */
 .legend {
   position: fixed; left: 10px; z-index: 450;
