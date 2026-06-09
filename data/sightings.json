@@ -2,7 +2,7 @@
   "appName": "宇都宮熊",
   "incident": "宇都宮市街地のクマ（2026年6月・同一個体）",
   "description": "2026年6月、宇都宮市の山林から市街地に下りてきた体長1m超・推定100kg超のクマ（同一個体）の目撃地点。宇都宮市公式『クマの出没にご注意ください』の時刻つき情報を10分おきに取得し、地名から座標化して表示。",
-  "updatedAt": "2026-06-09T09:30:32+09:00",
+  "updatedAt": "2026-06-09T11:47:32+00:00",
   "center": [
     36.5556,
     139.8819
@@ -302,7 +302,21 @@
       "status": "official",
       "source": "https://www.city.utsunomiya.lg.jp/kurashi/oshiraselist/1034544/1025612.html",
       "sourceName": "宇都宮市公式",
-      "id": 18,
+      "id": 18
+    },
+    {
+      "date": "2026-06-09",
+      "time": "15:45",
+      "datetime": "2026-06-09T15:45:00+09:00",
+      "area": "東簗瀬1丁目（）",
+      "town": "東簗瀬1丁目",
+      "detail": "",
+      "lat": 36.5657,
+      "lng": 139.8843,
+      "status": "official",
+      "source": "https://www.city.utsunomiya.lg.jp/kurashi/oshiraselist/1034544/1025612.html",
+      "sourceName": "宇都宮市公式",
+      "id": 19,
       "latest": true
     }
   ],
