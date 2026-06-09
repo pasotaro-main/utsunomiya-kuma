@@ -10,9 +10,7 @@
   "defaultRadiusM": 500,
   "source": {
     "official": "https://www.city.utsunomiya.lg.jp/kurashi/oshiraselist/1034544/1025612.html",
-    "officialName": "宇都宮市公式「クマの出没にご注意ください」",
-    "mymaps": "https://www.google.com/maps/d/u/0/viewer?mid=1FiDKp98cxzU1GQu04o5rnmbtT1mgmZs",
-    "mymapsName": "とちぎのクマ目撃情報2026（下野新聞）"
+    "officialName": "宇都宮市公式「クマの出没にご注意ください」"
   },
   "note": "時刻・場所は宇都宮市の公式発表に基づきます。地図上の位置は「○○から南西700m付近」等の記述を座標化した目安です。避難等の判断は必ず宇都宮市・警察の最新発表を優先してください。",
   "timeline": [

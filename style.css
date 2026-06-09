@@ -291,6 +291,18 @@ body {
 .link-btn { background: none; border: none; color: var(--accent-2); font-weight: 700; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
 .tag-conf { background: #166534; color: #fff; }
 
+/* 凡例（情報元の色分け） */
+.legend {
+  position: fixed; left: 10px; z-index: 450;
+  bottom: calc(var(--sheet-peek, 196px) + 10px);
+  background: rgba(22,24,29,.86); border: 1px solid #333a47; border-radius: 10px;
+  padding: 7px 9px; font-size: 11px; max-width: 48vw;
+  backdrop-filter: blur(6px); box-shadow: 0 4px 14px rgba(0,0,0,.4);
+}
+.lg-title { font-size: 10px; color: var(--muted); font-weight: 700; margin-bottom: 3px; }
+.lg-item { display: flex; align-items: center; gap: 5px; line-height: 1.7; white-space: nowrap; }
+.lg-dot { width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto; border: 1px solid rgba(255,255,255,.45); }
+
 /* タブレット/PC では中央寄せの読みやすい幅に */
 @media (min-width: 720px) {
   .sheet { max-width: 420px; right: auto; left: 12px; bottom: 12px; border-radius: 18px; }

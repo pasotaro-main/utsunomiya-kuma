@@ -58,9 +58,25 @@ function lerpColor(a, b, t) {
   const r = ah.map((v, i) => Math.round(v + (bh[i] - v) * t));
   return `rgb(${r[0]},${r[1]},${r[2]})`;
 }
-function ageColor(idx, n) {
-  // 古い(灰) → 新しい(赤)
-  return lerpColor('8a93a3', 'ff5a36', n <= 1 ? 1 : idx / (n - 1));
+// 情報元（出典）ごとの色分け
+const SOURCE_COLORS = {
+  '宇都宮市公式': '#e0431f', // 赤＝市の公式発表
+  '下野新聞': '#14b8a6',     // ティール＝下野新聞
+  'user': '#d97706',         // 橙＝みんなの投稿（未確認）
+  'default': '#8a93a3'       // 灰＝その他
+};
+function sourceColor(s) { return SOURCE_COLORS[s && s.sourceName] || SOURCE_COLORS.default; }
+function ageOpacity(idx, n) { return 0.5 + 0.5 * (n <= 1 ? 1 : idx / (n - 1)); } // 古いほど少し薄く
+
+function renderLegend() {
+  const el = document.getElementById('legend'); if (!el) return;
+  const present = [...new Set((SIGHTINGS || []).map(s => s.sourceName).filter(Boolean))];
+  const items = present.map(n => ({ c: SOURCE_COLORS[n] || SOURCE_COLORS.default, l: n }));
+  items.push({ c: SOURCE_COLORS.user, l: 'みんなの投稿（未確認）' });
+  items.push({ c: '#a855f7', l: 'AI予測' });
+  items.push({ c: '#2a8cff', l: '現在地' });
+  el.innerHTML = '<div class="lg-title">凡例（情報元）</div>' +
+    items.map(i => `<span class="lg-item"><span class="lg-dot" style="background:${i.c}"></span>${i.l}</span>`).join('');
 }
 
 /* ---------- 地図 ---------- */
@@ -93,11 +109,12 @@ function makeIcon(s, idx, n) {
       iconSize: [26, 26], iconAnchor: [13, 13], popupAnchor: [0, -14]
     });
   }
-  const c = ageColor(idx, n);
-  const sz = 22 + Math.round(8 * (n <= 1 ? 1 : idx / (n - 1)));
+  const c = sourceColor(s);
+  const frac = (n <= 1 ? 1 : idx / (n - 1));
+  const sz = 22 + Math.round(8 * frac);
   return L.divIcon({
     className: '',
-    html: `<div class="bear-marker" style="width:${sz}px;height:${sz}px;background:${c};font-size:${Math.round(sz*0.42)}px">${idx + 1}</div>`,
+    html: `<div class="bear-marker" style="width:${sz}px;height:${sz}px;background:${c};opacity:${ageOpacity(idx, n)};font-size:${Math.round(sz*0.42)}px">${idx + 1}</div>`,
     iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2], popupAnchor: [0, -sz / 2]
   });
 }
@@ -195,7 +212,7 @@ function renderList() {
     const li = document.createElement('li');
     if (s.latest) li.classList.add('is-latest');
     if (isUnverified(s)) li.classList.add('is-unverified');
-    const dotBg = s.latest ? '#ff5a36' : (isUnverified(s) ? '#6b7280' : ageColor(idx, n));
+    const dotBg = isUnverified(s) ? '#6b7280' : sourceColor(s);
     const dotTxt = s.latest ? '🐻' : (isUnverified(s) ? '?' : idx + 1);
     li.innerHTML =
       `<span class="dot" style="background:${dotBg}">${dotTxt}</span>` +
@@ -219,8 +236,9 @@ function renderList() {
     story.appendChild(li);
   });
 
+  const src = DATA.source || {};
   $('disclaimer').innerHTML =
-    `${DATA.note || ''}<br>データ出典：<a href="${DATA.source.mymaps}" target="_blank" rel="noopener">${DATA.source.mymapsName}↗</a>` +
+    `${DATA.note || ''}<br>データ出典：<a href="${src.official || '#'}" target="_blank" rel="noopener">${src.officialName || '宇都宮市公式'}↗</a>` +
     `<br>更新：${(DATA.updatedAt || '').slice(0, 10)}`;
 }
 
@@ -607,6 +625,7 @@ async function boot() {
   showAllOnMap();
   renderList();
   renderPrediction();
+  renderLegend();
   initRadius();
   initSheetDrag();
   setSheet(false);
