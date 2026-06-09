@@ -317,5 +317,56 @@
     "by": "Claude",
     "basedOnLatest": "2026-06-09T06:01:00+09:00",
     "updatedAt": "2026-06-09T11:11:32+09:00"
-  }
+  },
+  "webReports": [
+    {
+      "id": "w20260609-1",
+      "date": "2026-06-09",
+      "time": "06:35",
+      "place": "宇都宮大学峰キャンパス",
+      "lat": 36.548755,
+      "lng": 139.913087,
+      "kind": "捜索",
+      "summary": "宇都宮大学峰キャンパスでドローン捜索。7:52にクマはいないと確認。全学部・全研究科が休講。",
+      "source": "下野新聞ほか報道",
+      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1361827",
+      "credibility": "高",
+      "credReason": "地方紙＋複数報道で一致",
+      "by": "Claude",
+      "checkedAt": "2026-06-09T12:19:24+09:00"
+    },
+    {
+      "id": "w20260609-2",
+      "date": "2026-06-09",
+      "time": "08:30",
+      "place": "市立横川東小学校付近",
+      "lat": 36.532953,
+      "lng": 139.90677,
+      "kind": "捜索",
+      "summary": "6/9朝の目撃地点に近い市立横川東小学校でドローン捜索（発見につながらず）。",
+      "source": "下野新聞",
+      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1361827",
+      "credibility": "高",
+      "credReason": "地方紙報道",
+      "by": "Claude",
+      "checkedAt": "2026-06-09T12:19:24+09:00"
+    },
+    {
+      "id": "w20260609-3",
+      "date": "2026-06-09",
+      "time": "",
+      "place": "宇都宮市全域",
+      "lat": null,
+      "lng": null,
+      "kind": "対応",
+      "summary": "市立小中94校が6/9も臨時休校。市・警察が捜索と警戒を継続。",
+      "source": "報道・市発表",
+      "sourceUrl": "https://www.city.utsunomiya.lg.jp/kurashi/oshiraselist/1034544/1025612.html",
+      "credibility": "高",
+      "credReason": "公式・報道一致",
+      "by": "Claude",
+      "checkedAt": "2026-06-09T12:19:24+09:00"
+    }
+  ],
+  "webReportsNote": "ニュース＋SNSをClaudeが検索して収集し、信憑性（高=公式/大手報道, 中=地方/複数一致, 低=SNS/個人・未確認）を付与。X等の個人投稿は取得が限定的。"
 }

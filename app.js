@@ -73,10 +73,53 @@ function renderLegend() {
   const present = [...new Set((SIGHTINGS || []).map(s => s.sourceName).filter(Boolean))];
   const items = present.map(n => ({ c: SOURCE_COLORS[n] || SOURCE_COLORS.default, l: n }));
   items.push({ c: SOURCE_COLORS.user, l: 'みんなの投稿（未確認）' });
+  items.push({ c: '#16a34a', l: 'ニュース/SNS（信憑性つき）' });
   items.push({ c: '#a855f7', l: 'AI予測' });
   items.push({ c: '#2a8cff', l: '現在地' });
   el.innerHTML = '<div class="lg-title">凡例（情報元）</div>' +
     items.map(i => `<span class="lg-item"><span class="lg-dot" style="background:${i.c}"></span>${i.l}</span>`).join('');
+}
+
+/* ---------- ニュース・SNS情報（Claudeが信憑性つきで収集） ---------- */
+let webMarkers = [];
+function credColor(c) { return c === '高' ? '#16a34a' : c === '中' ? '#d97706' : '#6b7280'; }
+function renderWebReports() {
+  webMarkers.forEach(m => map.removeLayer(m)); webMarkers = [];
+  const items = (DATA.webReports || []);
+  // 地図ピンは「信憑性が中以上・場所特定済み」だけ（低やデマを地図に出さない）
+  items.forEach(r => {
+    if (typeof r.lat === 'number' && typeof r.lng === 'number' && r.credibility !== '低') {
+      const col = credColor(r.credibility);
+      const icon = L.divIcon({ className: '', html: `<div class="news-marker" style="border-color:${col}">📰<span class="news-cred" style="background:${col}">${r.credibility}</span></div>`, iconSize: [34, 28], iconAnchor: [17, 14], popupAnchor: [0, -14] });
+      const m = L.marker([r.lat, r.lng], { icon, zIndexOffset: 700 }).bindPopup(webPopup(r));
+      m.addTo(map); webMarkers.push(m);
+    }
+  });
+  renderWebList(items);
+}
+function webPopup(r) {
+  const col = credColor(r.credibility);
+  return `<b>📰 ${escapeHtml(r.kind || '情報')}</b> <span class="tag" style="background:${col}">信憑性${escapeHtml(r.credibility || '')}</span><br>` +
+    `<span class="popup-when">${r.date ? escapeHtml(r.date.slice(5)) : ''}${r.time ? ' ' + escapeHtml(r.time) : ''} ${escapeHtml(r.place || '')}</span><br>` +
+    `${escapeHtml(r.summary || '')}` +
+    (r.sourceUrl ? `<br><a href="${r.sourceUrl}" target="_blank" rel="noopener">${escapeHtml(r.source || '出典')}↗</a>` : (r.source ? `<br><span class="popup-when">${escapeHtml(r.source)}</span>` : ''));
+}
+function renderWebList(items) {
+  const wrap = document.getElementById('webList'), empty = document.getElementById('webEmpty');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (!items.length) { if (empty) empty.classList.remove('hidden'); return; }
+  if (empty) empty.classList.add('hidden');
+  items.slice().sort((a, b) => (b.date + (b.time || '')).localeCompare(a.date + (a.time || ''))).forEach(r => {
+    const col = credColor(r.credibility);
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="dot" style="background:${col}">📰</span>` +
+      `<div class="li-main"><div class="li-place">${escapeHtml(r.summary || r.place || '情報')} <span class="tag" style="background:${col}">信憑性${escapeHtml(r.credibility || '')}</span></div>` +
+      `<div class="li-detail">${escapeHtml(r.place || '')}${r.source ? ' ・ ' + escapeHtml(r.source) : ''}${r.credReason ? '（' + escapeHtml(r.credReason) + '）' : ''}</div></div>` +
+      `<div class="li-when">${r.date ? escapeHtml(r.date.slice(5)) : ''}${r.time ? ' ' + escapeHtml(r.time) : ''}</div>`;
+    if (typeof r.lat === 'number') li.onclick = () => map.flyTo([r.lat, r.lng], 15, { duration: .5 });
+    wrap.appendChild(li);
+  });
 }
 
 /* ---------- 地図 ---------- */
@@ -644,6 +687,7 @@ async function boot() {
   renderList();
   renderPrediction();
   renderLegend();
+  renderWebReports();
   initRadius();
   initSheetDrag();
   setSheet(false);

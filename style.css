@@ -284,6 +284,17 @@ body {
   border-radius: 10px; border: 2px solid #fff; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.5);
 }
 
+/* ニュース・SNS マーカー（信憑性で枠色） */
+.news-marker {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 24px; background: rgba(22,24,29,.92); border: 2px solid #16a34a;
+  border-radius: 8px; font-size: 14px; box-shadow: 0 1px 5px rgba(0,0,0,.5);
+}
+.news-cred {
+  position: absolute; top: -7px; right: -8px; font-size: 9px; font-weight: 800;
+  color: #fff; border-radius: 6px; padding: 0 4px; border: 1px solid #fff;
+}
+
 /* 投稿セクション */
 .reports-block { margin-top: 14px; border-top: 1px solid #2c313b; padding-top: 8px; }
 .unverified-note { color: var(--muted); font-size: 11px; font-weight: 400; }
