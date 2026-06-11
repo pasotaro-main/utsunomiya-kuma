@@ -74,7 +74,7 @@ function renderLegend() {
   const items = present.map(n => ({ c: SOURCE_COLORS[n] || SOURCE_COLORS.default, l: n }));
   items.push({ c: SOURCE_COLORS.user, l: 'みんなの投稿（未確認）' });
   items.push({ c: '#16a34a', l: 'ニュース/SNS（信憑性つき）' });
-  items.push({ c: '#a855f7', l: 'AI予測' });
+  if (DATA.predictionEnabled !== false) items.push({ c: '#a855f7', l: 'AI予測' });
   items.push({ c: '#2a8cff', l: '現在地' });
   el.innerHTML = '<div class="lg-title">凡例（情報元）</div>' +
     items.map(i => `<span class="lg-item"><span class="lg-dot" style="background:${i.c}"></span>${i.l}</span>`).join('');
@@ -244,6 +244,10 @@ function renderPrediction() {
   predictLayers.forEach(l => map.removeLayer(l));
   predictLayers = [];
   const card = document.getElementById('predictCard');
+  if (DATA.predictionEnabled === false) {
+    if (card) card.classList.add('hidden'); // 予測機能は停止中（データ側スイッチ）
+    return;
+  }
   const ist = DATA.incidentStatus && DATA.incidentStatus.state;
   if (ist === 'captured' || ist === 'caution') {
     if (card) card.classList.add('hidden'); // 捕獲/警戒中は個体を特定できないため予測を出さない

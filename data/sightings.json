@@ -427,5 +427,6 @@
     "source": "下野新聞",
     "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1362410",
     "updatedAt": "2026-06-10T08:16:53+09:00"
-  }
+  },
+  "predictionEnabled": false
 }
