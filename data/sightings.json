@@ -371,6 +371,22 @@
   "aiPrediction": null,
   "webReports": [
     {
+      "id": "w20260612-hq-dissolve",
+      "date": "2026-06-12",
+      "time": "",
+      "place": "宇都宮市",
+      "lat": null,
+      "lng": null,
+      "kind": "対応",
+      "summary": "市が危険鳥獣対策（クマ警戒）本部を解散。6/10午後3時以降に目撃通報2件があったが現地で痕跡は確認されず、捕獲後の新たな出没なしとして警戒パトロールを終了、対応の検証へ移行。",
+      "source": "下野新聞",
+      "sourceUrl": "https://www.shimotsuke.co.jp/articles/-/1364614",
+      "credibility": "高",
+      "credReason": "下野新聞報道・市公式発表に基づく",
+      "by": "Claude",
+      "checkedAt": "2026-06-18T00:00:00+09:00"
+    },
+    {
       "id": "w20260611-reopen",
       "date": "2026-06-11",
       "time": "",
